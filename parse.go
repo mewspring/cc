@@ -38,7 +38,7 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 		}
 		parentNode, ok := nodeFromHash[parent.HashCursor()]
 		if !ok {
-			panic(fmt.Errorf("unable to locate node of parent cursor %v(%v)", parent.Kind().String(), parent.Spelling()))
+			panic(fmt.Errorf("unable to locate node of parent cursor %v(%v)", parentNode.Kind, parentNode.Spelling))
 		}
 		loc := cursor.Location()
 		file, line, col := loc.PresumedLocation()
