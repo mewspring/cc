@@ -1,4 +1,4 @@
-module github.com/mewmew/cc
+module github.com/mewspring/cc
 
 go 1.13
 
