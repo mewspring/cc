@@ -15,9 +15,9 @@ type File struct {
 	// Root node of the parsed AST.
 	Root *Node
 	// Index of translation units.
-	idx *clang.Index
+	idx clang.Index
 	// Translation unit.
-	tu *clang.TranslationUnit
+	tu clang.TranslationUnit
 }
 
 // Close releases the resources associated with the parsed source file. Note
@@ -30,7 +30,7 @@ func (file *File) Close() {
 
 // ParseFile parses the given source file, returning the root node of the AST.
 // Note, a (partial) AST is returned even when an error is encountered.
-func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
+func ParseFile(srcPath string, clangArgs ...string) (*File, error) {
 	// Create index.
 	idx := clang.NewIndex(0, 1)
 	// Create translation unit.
@@ -78,7 +78,11 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 		return clang.ChildVisit_Recurse
 	}
 	cursor.Visit(visit)
-	return root, err
+	return &File{
+		Root: root,
+		idx:  idx,
+		tu:   tu,
+	}, err
 }
 
 // Node is a node of the AST.
