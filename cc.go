@@ -15,10 +15,10 @@ import (
 func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 	// Create index.
 	idx := clang.NewIndex(0, 1)
-	defer idx.Dispose()
+	//defer idx.Dispose()
 	// Create translation unit.
 	tu := idx.ParseTranslationUnit(srcPath, clangArgs, nil, 0)
-	defer tu.Dispose()
+	//defer tu.Dispose()
 	// Print errors.
 	diagnostics := tu.Diagnostics()
 	var err error
@@ -95,6 +95,16 @@ type Location struct {
 	Line uint32
 	// Column (1-indexed).
 	Col uint32
+}
+
+// NewLocation returns a new location based on the given Clang source location.
+func NewLocation(loc clang.SourceLocation) Location {
+	file, line, col := loc.PresumedLocation()
+	return Location{
+		File: file,
+		Line: line,
+		Col:  col,
+	}
 }
 
 // String returns a string representation of the source code location.
