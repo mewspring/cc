@@ -5,21 +5,37 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-clang/clang-v3.9/clang"
 	multierror "github.com/hashicorp/go-multierror"
-	"github.com/mewspring/go-clang/clang"
 	"github.com/pkg/errors"
 )
+
+// File is a parsed source file.
+type File struct {
+	// Root node of the parsed AST.
+	Root *Node
+	// Index of translation units.
+	idx *clang.Index
+	// Translation unit.
+	tu *clang.TranslationUnit
+}
+
+// Close releases the resources associated with the parsed source file. Note
+// that calling methods on nodes of the AST is only valid until the file is
+// closed.
+func (file *File) Close() {
+	file.tu.Dispose()
+	file.idx.Dispose()
+}
 
 // ParseFile parses the given source file, returning the root node of the AST.
 // Note, a (partial) AST is returned even when an error is encountered.
 func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 	// Create index.
 	idx := clang.NewIndex(0, 1)
-	//defer idx.Dispose()
 	// Create translation unit.
 	tu := idx.ParseTranslationUnit(srcPath, clangArgs, nil, 0)
-	//defer tu.Dispose()
-	// Print errors.
+	// Record errors.
 	diagnostics := tu.Diagnostics()
 	var err error
 	for _, d := range diagnostics {
@@ -31,45 +47,33 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 	loc := cursor.Location()
 	file, line, col := loc.PresumedLocation()
 	root := &Node{
-		Body:     cursor,
-		Def:      cursor.Definition(),
-		Kind:     cursor.Kind().String(),
-		Spelling: cursor.Spelling(),
+		Body: cursor,
 		Loc: Location{
 			File: file,
 			Line: line,
 			Col:  col,
 		},
 	}
-	hash := fmt.Sprintf("%s_%s", root.Body.Kind().String(), root.Loc.String())
-	fmt.Println("root hash:", hash)
-	nodeFromHash[hash] = root
+	nodeFromHash[hashFromCursor(root.Body)] = root
 	visit := func(cursor, parent clang.Cursor) clang.ChildVisitResult {
 		if cursor.IsNull() {
 			return clang.ChildVisit_Continue
 		}
-		hash := fmt.Sprintf("%s_%s", parent.Kind().String(), NewLocation(parent.Location()).String())
-		fmt.Println("parent hash:", hash)
-		parentNode, ok := nodeFromHash[hash]
+		parentNode, ok := nodeFromHash[hashFromCursor(parent)]
 		if !ok {
-			panic(fmt.Errorf("unable to locate node of parent cursor %v(%v)", parentNode.Kind, parentNode.Spelling))
+			panic(fmt.Errorf("unable to locate node of parent cursor %v(%v)", parentNode.Body.Kind(), parentNode.Body.Spelling()))
 		}
 		loc := cursor.Location()
 		file, line, col := loc.PresumedLocation()
 		n := &Node{
-			Body:     cursor,
-			Def:      cursor.Definition(),
-			Kind:     cursor.Kind().String(),
-			Spelling: cursor.Spelling(),
+			Body: cursor,
 			Loc: Location{
 				File: file,
 				Line: line,
 				Col:  col,
 			},
 		}
-		hash = fmt.Sprintf("%s_%s", n.Body.Kind().String(), n.Loc.String())
-		fmt.Println("node hash:", hash)
-		nodeFromHash[hash] = n
+		nodeFromHash[hashFromCursor(n.Body)] = n
 		parentNode.Children = append(parentNode.Children, n)
 		return clang.ChildVisit_Recurse
 	}
@@ -81,12 +85,6 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 type Node struct {
 	// Node contents.
 	Body clang.Cursor
-	// Definition of the entry associated with the node.
-	Def clang.Cursor
-	// String representation of node.
-	Spelling string // cached result of Body.Spelling()
-	// Node kind.
-	Kind string // cached result of Body.Kind().String()
 	// Source location of node.
 	Loc Location // cached result of Body.Location().PersumedLocation()
 	// Child nodes of the node.
@@ -139,4 +137,11 @@ func Walk(root *Node, f func(n *Node)) {
 	for _, child := range root.Children {
 		Walk(child, f)
 	}
+}
+
+// hashFromCursor returns a hash to uniquely identify the given cursor.
+func hashFromCursor(cursor clang.Cursor) string {
+	kind := cursor.Kind().String()
+	loc := NewLocation(cursor.Location())
+	return fmt.Sprintf("%s_%s", kind, loc)
 }

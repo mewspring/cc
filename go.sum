@@ -1,11 +1,11 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-clang/clang-v3.9 v0.0.0-20190823090603-8e83bb44d7e2 h1:3lBzS16ZtfZGEDFghbdcJU/+2mCDNRnSWoJzg2Z676s=
+github.com/go-clang/clang-v3.9 v0.0.0-20190823090603-8e83bb44d7e2/go.mod h1:y90ELSe6Rzaes/UtrEYpVbwEgkbq03IkzCrMYarGkVo=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.0.0 h1:iVjPR7a6H0tWELX5NxNe7bYopibicUzc7uPribsnS6o=
 github.com/hashicorp/go-multierror v1.0.0/go.mod h1:dHtQlpGsu+cZNNAkkCN/P3hoUDHhCYQXV3UM06sGGrk=
-github.com/mewspring/go-clang v0.0.0-20190823000731-2fa82e508cfb h1:RkroXhaJL9nRCF4GuP99/b38Jy1E4P4X4Im5QuThAvc=
-github.com/mewspring/go-clang v0.0.0-20190823000731-2fa82e508cfb/go.mod h1:FSrTR+tc2s/9vH/y0JoNx9pRWdlZ3Z1N/eO48Ppte3g=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
