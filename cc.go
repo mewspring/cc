@@ -26,7 +26,7 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 		err = multierror.Append(err, errors.New(d.Spelling()))
 	}
 	// Parse source file.
-	nodeFromHash := make(map[uint32]*Node)
+	nodeFromHash := make(map[string]*Node)
 	cursor := tu.TranslationUnitCursor()
 	loc := cursor.Location()
 	file, line, col := loc.PresumedLocation()
@@ -41,12 +41,16 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 			Col:  col,
 		},
 	}
-	nodeFromHash[root.Body.HashCursor()] = root
+	hash := fmt.Sprintf("%s_%s", root.Body.Kind().String(), root.Loc.String())
+	fmt.Println("root hash:", hash)
+	nodeFromHash[hash] = root
 	visit := func(cursor, parent clang.Cursor) clang.ChildVisitResult {
 		if cursor.IsNull() {
 			return clang.ChildVisit_Continue
 		}
-		parentNode, ok := nodeFromHash[parent.HashCursor()]
+		hash := fmt.Sprintf("%s_%s", parent.Kind().String(), NewLocation(parent.Location()).String())
+		fmt.Println("parent hash:", hash)
+		parentNode, ok := nodeFromHash[hash]
 		if !ok {
 			panic(fmt.Errorf("unable to locate node of parent cursor %v(%v)", parentNode.Kind, parentNode.Spelling))
 		}
@@ -63,7 +67,9 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 				Col:  col,
 			},
 		}
-		nodeFromHash[n.Body.HashCursor()] = n
+		hash = fmt.Sprintf("%s_%s", n.Body.Kind().String(), n.Loc.String())
+		fmt.Println("node hash:", hash)
+		nodeFromHash[hash] = n
 		parentNode.Children = append(parentNode.Children, n)
 		return clang.ChildVisit_Recurse
 	}
