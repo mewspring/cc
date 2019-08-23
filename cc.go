@@ -32,6 +32,7 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 	file, line, col := loc.PresumedLocation()
 	root := &Node{
 		Body:     cursor,
+		Def:      cursor.Definition(),
 		Kind:     cursor.Kind().String(),
 		Spelling: cursor.Spelling(),
 		Loc: Location{
@@ -53,6 +54,7 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 		file, line, col := loc.PresumedLocation()
 		n := &Node{
 			Body:     cursor,
+			Def:      cursor.Definition(),
 			Kind:     cursor.Kind().String(),
 			Spelling: cursor.Spelling(),
 			Loc: Location{
@@ -73,6 +75,8 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 type Node struct {
 	// Node contents.
 	Body clang.Cursor
+	// Definition of the entry associated with the node.
+	Def clang.Cursor
 	// String representation of node.
 	Spelling string // cached result of Body.Spelling()
 	// Node kind.
@@ -110,5 +114,13 @@ func printTree(n *Node, indentLevel int) {
 	fmt.Printf("%s%s\n", indent, n.Body.Kind().String())
 	for _, child := range n.Children {
 		printTree(child, indentLevel+1)
+	}
+}
+
+// Walk walks the given AST, invoking f for each node visited.
+func Walk(root *Node, f func(n *Node)) {
+	f(root)
+	for _, child := range root.Children {
+		Walk(child, f)
 	}
 }
