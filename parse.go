@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/FrankReh/go-clang/clang" // "github.com/go-clang/v3.9/clang"
 	multierror "github.com/hashicorp/go-multierror"
+	"github.com/mewspring/go-clang/clang"
 	"github.com/pkg/errors"
 )
 
@@ -28,8 +28,17 @@ func ParseFile(srcPath string, clangArgs ...string) (*Node, error) {
 	// Parse source file.
 	nodeFromHash := make(map[uint32]*Node)
 	cursor := tu.TranslationUnitCursor()
+	loc := cursor.Location()
+	file, line, col := loc.PresumedLocation()
 	root := &Node{
-		Body: cursor,
+		Body:     cursor,
+		Kind:     cursor.Kind().String(),
+		Spelling: cursor.Spelling(),
+		Loc: Location{
+			File: file,
+			Line: line,
+			Col:  col,
+		},
 	}
 	nodeFromHash[root.Body.HashCursor()] = root
 	visit := func(cursor, parent clang.Cursor) clang.ChildVisitResult {
